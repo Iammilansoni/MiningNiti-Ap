@@ -33,6 +33,7 @@ app = FastAPI()
 # CORS settings
 origins = [
     "https://miningniti.vercel.app",
+    "https://miningniti.vercel.app/chatting",
     "http://localhost:5173",
     "http://localhost",
     "http://localhost:3000",
