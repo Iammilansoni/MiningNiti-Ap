@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: miningniti
+    env: python
+    plan: free
+    buildCommand: |
+      pip install poetry
+      poetry config virtualenvs.create false
+      poetry install --no-dev
+    startCommand: uvicorn app:app --host 0.0.0.0 --port 8000
