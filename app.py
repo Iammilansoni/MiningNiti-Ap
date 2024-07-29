@@ -38,19 +38,21 @@ origins = [
     "http://localhost",
     "http://localhost:3000",
     "http://localhost:3000/chatting",
-
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://miningniti.vercel.app"],
-     allow_credentials=True,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],  # Adjust this line based on the headers your frontend sends
 )
 
 class Item(BaseModel):
     input_query: str
+
+# In-memory storage for chat history
+chat_history = []
 
 @app.post("/chat")
 def run(item: Item, model: MyChatBot = Depends(lambda: model)):
@@ -59,9 +61,17 @@ def run(item: Item, model: MyChatBot = Depends(lambda: model)):
     """
     try:
         response = model.run(input=item.input_query)
+        chat_history.append({"message": item.input_query, "response": response})
         return JSONResponse(content={"response": response})
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/history")
+def get_history():
+    """
+    Endpoint to retrieve chat history.
+    """
+    return JSONResponse(content={"history": chat_history})
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
