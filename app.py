@@ -1,13 +1,17 @@
-
+# app.py
 import os
 import yaml
 from dotenv import load_dotenv
-from fastapi import FastAPI, Depends, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-import uvicorn
-from pydantic import BaseModel
-from src.model import MyChatBot
+from fastapi import FastAPI, Depends, HTTPException, File, UploadFile # type: ignore
+from fastapi.middleware.cors import CORSMiddleware # type: ignore
+from fastapi.responses import JSONResponse # type: ignore
+import uvicorn # type: ignore
+from pydantic import BaseModel # type: ignore
+from src.model import MyChatBot 
+from src.utils import extract_text_from_pdf # type: ignore
+from src.db import store_pdf_text, search_pdf_text # type: ignore
+
+
 
 # Load environment variables
 load_dotenv()
@@ -39,19 +43,19 @@ origins = [
     "http://localhost",
     "http://localhost:3000",
     "http://localhost:3000/chatting",
-
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://miningniti.vercel.app"],
-     allow_credentials=True,
+    allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],  # Adjust this line based on the headers your frontend sends
+    allow_headers=["*"],
 )
 
 class Item(BaseModel):
     input_query: str
+    source: str  # "database", "internet", or "both"
 
 @app.post("/chat")
 def run(item: Item, model: MyChatBot = Depends(lambda: model)):
@@ -59,8 +63,33 @@ def run(item: Item, model: MyChatBot = Depends(lambda: model)):
     Endpoint to handle chat requests.
     """
     try:
-        response = model.run(input=item.input_query)
+        if item.source == "database":
+            results = search_pdf_text(item.input_query)
+            response = "\n".join([f"PDF: {res['pdf_name']}\nText: {res['text']}" for res in results])
+        elif item.source == "internet":
+            response = model.run(input=item.input_query)
+        else:  # both
+            results = search_pdf_text(item.input_query)
+            db_response = "\n".join([f"PDF: {res['pdf_name']}\nText: {res['text']}" for res in results])
+            internet_response = model.run(input=item.input_query)
+            response = f"Database Results:\n{db_response}\n\nInternet Results:\n{internet_response}"
         return JSONResponse(content={"response": response})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/extract_text_from_pdf")
+async def extract_text_from_pdf_endpoint(file: UploadFile = File(...)):
+    """
+    Endpoint to handle PDF uploads and text extraction.
+    """
+    try:
+        file_location = f"temp/{file.filename}"
+        with open(file_location, "wb") as f:
+            f.write(file.file.read())
+        text = extract_text_from_pdf(file_location)
+        store_pdf_text(file.filename, text)
+        os.remove(file_location)
+        return JSONResponse(content={"message": "Text extracted and stored successfully."})
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
