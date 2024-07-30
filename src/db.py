@@ -11,4 +11,5 @@ def store_pdf_text(pdf_name: str, text: str):
 
 def search_pdf_text(query: str):
     results = collection.find({"text": {"$regex": query, "$options": "i"}})
-    return results
+    return list(results)
+

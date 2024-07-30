@@ -2,16 +2,14 @@
 import os
 import yaml
 from dotenv import load_dotenv
-from fastapi import FastAPI, Depends, HTTPException, File, UploadFile # type: ignore
-from fastapi.middleware.cors import CORSMiddleware # type: ignore
-from fastapi.responses import JSONResponse # type: ignore
-import uvicorn # type: ignore
-from pydantic import BaseModel # type: ignore
-from src.model import MyChatBot 
-from src.utils import extract_text_from_pdf # type: ignore
-from src.db import store_pdf_text, search_pdf_text # type: ignore
-
-
+from fastapi import FastAPI, Depends, HTTPException, File, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+import uvicorn
+from pydantic import BaseModel
+from src.model import MyChatBot
+from src.utils import extract_text_from_pdf
+from src.db import store_pdf_text, search_pdf_text
 
 # Load environment variables
 load_dotenv()
