@@ -8,8 +8,7 @@ from fastapi.responses import JSONResponse
 import uvicorn
 from pydantic import BaseModel
 from src.model import MyChatBot
-from src.utils import extract_text_from_pdf
-from src.db import store_pdf_text, search_pdf_text
+
 
 # Load environment variables
 load_dotenv()
