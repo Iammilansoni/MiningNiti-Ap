@@ -2,7 +2,6 @@ import os
 import logging
 import textwrap
 from typing import Any
-# from google.generativeai import configure  # Uncomment if using this module
 from langchain_google_genai import ChatGoogleGenerativeAI  # type: ignore
 from langchain.prompts import PromptTemplate  # type: ignore
 from langchain.chains import LLMChain  # type: ignore
@@ -12,17 +11,16 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class MyChatBot:
-    def __init__(self, api_key: str, temperature: float):
+    def __init__(self, api_key: str, temperature: float = 0.7):
         """
         Initializes the chatbot with the given API key and temperature setting.
         """
         os.environ['GOOGLE_API_KEY'] = api_key
-        configure(api_key=api_key)  # Uncomment if using google.generativeai
         self.llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=temperature)
         self.chain = None
         logger.info("Chatbot initialized with API key and temperature settings.")
 
-    def set_prompt(self, template: str, input_variables: dict):
+    def set_prompt(self, template: str, input_variables: list[str]):
         """
         Sets the prompt template and input variables for the chatbot.
         """
@@ -62,9 +60,3 @@ class MyChatBot:
         Allows the class instance to be called like a function.
         """
         return self.run(*args, **kwds)
-
-# Example usage:
-# bot = MyChatBot("your_api_key_here", 0.5)
-# bot.set_prompt("Write a C++ code of Error handling", {})
-# response = bot("Write a C++ code of Error handling")
-# print(response)
