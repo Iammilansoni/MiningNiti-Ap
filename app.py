@@ -1,14 +1,13 @@
-# app.py
+#app.py 
 import os
 import yaml
 from dotenv import load_dotenv
-from fastapi import FastAPI, Depends, HTTPException, File, UploadFile
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import uvicorn
 from pydantic import BaseModel
 from src.model import MyChatBot
-
 
 # Load environment variables
 load_dotenv()
@@ -46,49 +45,33 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://miningniti.vercel.app"],
     allow_credentials=True,
+     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["*"],  # Adjust this line based on the headers your frontend sends
 )
 
 class Item(BaseModel):
     input_query: str
-    source: str  # "database", "internet", or "both"
 
+# In-memory storage for chat history
+chat_history = []
 @app.post("/chat")
 def run(item: Item, model: MyChatBot = Depends(lambda: model)):
     """
     Endpoint to handle chat requests.
     """
     try:
-        if item.source == "database":
-            results = search_pdf_text(item.input_query)
-            response = "\n".join([f"PDF: {res['pdf_name']}\nText: {res['text']}" for res in results])
-        elif item.source == "internet":
-            response = model.run(input=item.input_query)
-        else:  # both
-            results = search_pdf_text(item.input_query)
-            db_response = "\n".join([f"PDF: {res['pdf_name']}\nText: {res['text']}" for res in results])
-            internet_response = model.run(input=item.input_query)
-            response = f"Database Results:\n{db_response}\n\nInternet Results:\n{internet_response}"
+        response = model.run(input=item.input_query)
+        chat_history.append({"message": item.input_query, "response": response})
         return JSONResponse(content={"response": response})
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/extract_text_from_pdf")
-async def extract_text_from_pdf_endpoint(file: UploadFile = File(...)):
+@app.get("/history")
+def get_history():
     """
-    Endpoint to handle PDF uploads and text extraction.
+    Endpoint to retrieve chat history.
     """
-    try:
-        file_location = f"temp/{file.filename}"
-        with open(file_location, "wb") as f:
-            f.write(file.file.read())
-        text = extract_text_from_pdf(file_location)
-        store_pdf_text(file.filename, text)
-        os.remove(file_location)
-        return JSONResponse(content={"message": "Text extracted and stored successfully."})
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
+    return JSONResponse(content={"history": chat_history})
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
