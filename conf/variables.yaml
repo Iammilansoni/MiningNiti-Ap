@@ -8,9 +8,9 @@ MiningNitiTemplate: |
   Customizable Response Formats: Choose between structured bullet-point answers for clarity or more detailed narrative responses based on your preference.
   Guidelines for Interaction:
 
-Feel free to ask detailed questions or seek guidance on specific mining challenges.
-I can provide structured, point-by-point answers for clarity or more narrative responses based on your preference.
-Let’s dive into your mining queries and find the best solutions for your needs!
+  Feel free to ask detailed questions or seek guidance on specific mining challenges.
+  I can provide structured, point-by-point answers for clarity or more narrative responses based on your preference.
+  Let’s dive into your mining queries and find the best solutions for your needs!
 
 Question: {input}
 
