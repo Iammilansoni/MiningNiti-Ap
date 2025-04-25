@@ -2,7 +2,7 @@ import os
 import logging
 import textwrap
 import yaml
-from typing import Any, List # Corrected List import
+from typing import Any, List  # Corrected List import
 from langchain_google_genai import ChatGoogleGenerativeAI  # type: ignore
 from langchain.prompts import PromptTemplate  # type: ignore
 from langchain.chains import LLMChain  # type: ignore
@@ -95,16 +95,12 @@ class MyChatBot:
             try:
                 logger.info(f"Running chain with input: {input[:100]}...") # Log truncated input
                 # Use run method for simple input/output chains if predict causes issues or for consistency
-                # response = self.chain.run(input=input) # or self.chain.run({"input": input})
-                response = self.chain.predict(input=input) # predict is fine for single input/output
+                response = self.chain.run(input=input) # Run method to ensure proper injection
                 logger.info("Chain execution successful.")
                 return self.format_code_response(response)
             except Exception as e:
                 logger.error(f"Error generating response: {str(e)}")
                 # Specific error handling can be added here if needed
-                # e.g., check for rate limit errors, model errors, etc.
-                # Returning a dictionary might not be ideal for all callers, consider raising
-                # return {"error": f"Failed to get response from LLM: {str(e)}"}, 500
                 raise Exception(f"Failed to get response from LLM: {str(e)}") # Re-raise for FastAPI handler
         else:
             logger.error("Chain not initialized. Cannot run.")
@@ -113,10 +109,8 @@ class MyChatBot:
 
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         # Ensure __call__ passes arguments correctly to run
-        # Assuming the first argument to __call__ is the input string
         if args:
             input_arg = args[0]
-            # You might want to handle other args/kwds if necessary
             return self.run(input=input_arg)
         elif "input" in kwds:
              return self.run(input=kwds["input"])
