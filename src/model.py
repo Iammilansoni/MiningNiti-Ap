@@ -16,7 +16,7 @@ class MyChatBot:
         Initializes the chatbot with the given API key and temperature setting.
         """
         os.environ['GOOGLE_API_KEY'] = api_key
-        self.llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=temperature)
+        self.llm = ChatGoogleGenerativeAI(model="gemini-2.5-pro", temperature=temperature)
         self.chain = None
         logger.info("Chatbot initialized with API key and temperature settings.")
 
