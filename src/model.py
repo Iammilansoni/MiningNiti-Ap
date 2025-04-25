@@ -21,12 +21,12 @@ class MyChatBot:
         # Configure the new google-genai client with v1alpha API
         try:
             genai.configure(api_key=api_key, http_options=types.HttpOptions(api_version="v1alpha"))
-            self.llm = ChatGoogleGenerativeAI(model="gemini-2.5-pro", temperature=temperature)
-            logger.info("Chatbot initialized with gemini-2.5-pro, v1alpha API, and temperature settings.")
+            self.llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro", temperature=temperature)
+            logger.info("Chatbot initialized with gemini-1.5-pro, v1alpha API, and temperature settings.")
         except Exception as e:
             logger.error(f"Failed to initialize model gemini-2.5-pro: {str(e)}")
             logger.info("Falling back to gemini-2.0-flash")
-            self.llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=temperature)
+            self.llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=temperature)
         self.chain = None
 
     def set_prompt(self, template: str, input_variables: list[str]):
