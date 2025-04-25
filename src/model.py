@@ -16,19 +16,11 @@ class MyChatBot:
         """
         Initializes the chatbot with the given API key and temperature setting.
         """
-        # Set the Google API key
         os.environ['GOOGLE_API_KEY'] = api_key
-        # Configure the google.generativeai client to use v1 API
-        genai.configure(api_key=api_key, client_options={"api_version": "v1"})
-        # Initialize the model with a supported model name
-        try:
-            self.llm = ChatGoogleGenerativeAI(model="gemini-2.5-pro", temperature=temperature)
-            logger.info("Chatbot initialized with API key, v1 API, and temperature settings.")
-        except Exception as e:
-            logger.error(f"Failed to initialize model gemini-2.5-pro: {str(e)}")
-            logger.info("Falling back to gemini-2.0-flash")
-            self.llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=temperature)
+        genai.configure(api_key=api_key)  # Remove client_options
+        self.llm = ChatGoogleGenerativeAI(model="models/gemini-pro", temperature=temperature)  # Update model
         self.chain = None
+        logger.info("Chatbot initialized with API key and temperature settings.")
 
     def set_prompt(self, template: str, input_variables: list[str]):
         """
