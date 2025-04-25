@@ -5,7 +5,8 @@ from typing import Any
 from langchain_google_genai import ChatGoogleGenerativeAI  # type: ignore
 from langchain.prompts import PromptTemplate  # type: ignore
 from langchain.chains import LLMChain  # type: ignore
-import google.generativeai as genai  # Import for API version configuration
+import google.genai as genai  # Import new SDK
+from google.genai import types  # For HttpOptions
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -17,10 +18,16 @@ class MyChatBot:
         Initializes the chatbot with the given API key and temperature setting.
         """
         os.environ['GOOGLE_API_KEY'] = api_key
-        genai.configure(api_key=api_key)  # Remove client_options
-        self.llm = ChatGoogleGenerativeAI(model="models/gemini-pro", temperature=temperature)  # Update model
+        # Configure the new google-genai client with v1alpha API
+        try:
+            genai.configure(api_key=api_key, http_options=types.HttpOptions(api_version="v1alpha"))
+            self.llm = ChatGoogleGenerativeAI(model="gemini-2.5-pro", temperature=temperature)
+            logger.info("Chatbot initialized with gemini-2.5-pro, v1alpha API, and temperature settings.")
+        except Exception as e:
+            logger.error(f"Failed to initialize model gemini-2.5-pro: {str(e)}")
+            logger.info("Falling back to gemini-2.0-flash")
+            self.llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=temperature)
         self.chain = None
-        logger.info("Chatbot initialized with API key and temperature settings.")
 
     def set_prompt(self, template: str, input_variables: list[str]):
         """
